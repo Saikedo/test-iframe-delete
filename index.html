@@ -133,6 +133,7 @@
             <input type="text" id="messageInput" placeholder="Enter your message here..." />
             <textarea id="dataInput" placeholder="Optional: JSON data to send"></textarea>
             <button onclick="sendMessageToParent()">Send Message</button>
+            <button onclick="setCookieDirectly()">Set Cookie (SameSite=None)</button>
             <button onclick="clearInputs()">Clear</button>
         </div>
         
@@ -197,9 +198,19 @@
                     url: window.location.href
                 });
             } else if (data.message === 'setCookies') {
-                // Set a test cookie
-                document.cookie = "hello=world; path=/; SameSite=Lax";
+                // Set a test cookie - try different approaches for cross-origin
+                const isHTTPS = window.location.protocol === 'https:';
+                const cookieString = isHTTPS 
+                    ? "hello=world; path=/; SameSite=None; Secure"
+                    : "hello=world; path=/; SameSite=Lax";
+                
+                document.cookie = cookieString;
+                logMessage(`🍪 Attempted to set cookie: ${cookieString}`, 'received');
+                
+                // Check immediately if cookie was set
                 const cookies = document.cookie;
+                const wasSet = cookies.includes('hello=world');
+                logMessage(`🍪 Cookie set success: ${wasSet}`, 'received');
                 logMessage(`🍪 Current cookies: ${cookies || 'No cookies found'}`, 'received');
                 
                 // Send cookies back to parent
@@ -260,6 +271,26 @@
                     <span class="timestamp">Cleared</span> - Log cleared
                 </div>
             `;
+        }
+
+        // Set cookie directly from button click
+        function setCookieDirectly() {
+            const isHTTPS = window.location.protocol === 'https:';
+            const cookieString = isHTTPS 
+                ? "original-cookie=test-value; path=/; SameSite=None; Secure"
+                : "original-cookie=test-value; path=/; SameSite=Lax";
+            
+            document.cookie = cookieString;
+            logMessage(`🍪 Direct cookie set: ${cookieString}`, 'info');
+            
+            // Check immediately if cookie was set
+            const cookies = document.cookie;
+            const wasSet = cookies.includes('original-cookie=test-value');
+            logMessage(`🍪 Cookie set success: ${wasSet}`, wasSet ? 'info' : 'received');
+            
+            if (wasSet) {
+                logMessage(`🍪 All cookies: ${cookies}`, 'info');
+            }
         }
 
         // Send initial ready message to parent
