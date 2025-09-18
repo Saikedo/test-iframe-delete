@@ -199,13 +199,15 @@
             } else if (data.message === 'setCookies') {
                 // Set a test cookie
                 document.cookie = "hello=world; path=/; SameSite=Lax";
-                logMessage(`🍪 Cookie set: hello=world`, 'received');
+                const cookies = document.cookie;
+                logMessage(`🍪 Current cookies: ${cookies || 'No cookies found'}`, 'received');
                 
-                // Send confirmation back to parent
-                sendMessageToParent('cookies-set', { 
-                    cookieName: 'hello',
-                    cookieValue: 'world',
-                    timestamp: new Date().toISOString()
+                // Send cookies back to parent
+                sendMessageToParent('cookies-logged', { 
+                    cookies: cookies,
+                    cookieCount: cookies ? cookies.split(';').length : 0,
+                    domain: window.location.hostname,
+                    url: window.location.href
                 });
             }
         });
